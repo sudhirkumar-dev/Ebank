@@ -5,14 +5,14 @@ import {Redirect} from 'react-router-dom'
 
 class LoginForm extends Component {
   state = {
-    pin: '',
+    userPin: '',
     userId: '',
     showSubmitError: false,
     errorMsg: '',
   }
 
   onChangePin = e => {
-    this.setState({pin: e.target.value})
+    this.setState({userPin: e.target.value})
   }
 
   onChangeUserId = e => {
@@ -21,9 +21,7 @@ class LoginForm extends Component {
 
   onSubmitSuccess = jwtToken => {
     const {history} = this.props
-    Cookies.set('jwt_token', jwtToken, {
-      path: '/',
-    })
+    Cookies.set('jwt_token', jwtToken, {expires: 30})
     history.replace('/')
   }
 
@@ -33,10 +31,11 @@ class LoginForm extends Component {
 
   onSubmitForm = async e => {
     e.preventDefault()
-    const {pin, userId} = this.state
-    const userCredentials = {pin, userId}
+    const {userPin, userId} = this.state
+    const userCredentials = {userPin, userId}
     const url = 'https://apis.ccbp.in/ebank/login'
     const options = {
+      mode: 'cors',
       method: 'POST',
       body: JSON.stringify(userCredentials),
     }
@@ -52,16 +51,17 @@ class LoginForm extends Component {
   }
 
   renderPinField = () => {
-    const {pin} = this.state
+    const {userPin} = this.state
     return (
       <>
-        <label htmlFor="password">Pin</label>
+        <label htmlFor="userPin">Pin</label>
         <input
           type="password"
-          id="password"
+          id="userPin"
           className="password-input-field"
-          value={pin}
+          value={userPin}
           onChange={this.onChangePin}
+          placeholder="Enter PIN"
         />
       </>
     )
@@ -71,13 +71,14 @@ class LoginForm extends Component {
     const {userId} = this.state
     return (
       <>
-        <label htmlFor="user_id">User ID</label>
+        <label htmlFor="userId">User ID</label>
         <input
           type="text"
-          id="user_id"
+          id="userId"
           className="user_id-input-field"
           value={userId}
           onChange={this.onChangeUserId}
+          placeholder="Enter User ID"
         />
       </>
     )
@@ -90,7 +91,7 @@ class LoginForm extends Component {
       return <Redirect to="/" />
     }
     return (
-      <form className="app-container">
+      <div className="app-container">
         <div className="login-app-container">
           <div className="img-container">
             <img
@@ -99,15 +100,15 @@ class LoginForm extends Component {
               className="login-img"
             />
           </div>
-          <form className="form-container">
+          <form className="form-container" onSubmit={this.onSubmitForm}>
             <h1>Welcome back!</h1>
             <div className="input-container">{this.renderUserIdField()}</div>
             <div className="input-container">{this.renderPinField()}</div>
-            {showSubmitError && <p className="error-message">{errorMsg}</p>}
             <button type="submit">Login</button>
+            {showSubmitError && <p className="error-message">{errorMsg}</p>}
           </form>
         </div>
-      </form>
+      </div>
     )
   }
 }
